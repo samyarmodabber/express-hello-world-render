@@ -1,11 +1,42 @@
 const express = require("express");
 const app = express();
-const port = process.env.PORT || 3001;
+
+const mongoose = require('mongoose');
+const Word = require('./models/wordModel');
+require('dotenv').config()
+
+const port = process.env.PORT || 5000;
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: false }));
+
+app.get('/words/:word', async (req, res) => {
+  try {
+    const { word } = req.params;
+    const item = await Word.findOne({ esperanto: word });
+    console.log(item);
+    res.status(200).json(item);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 
 app.get("/", (req, res) => res.type('html').send(html));
 
-app.listen(port, () => console.log(`Example app listening on port ${port}!`));
+// app.listen(port, () => console.log(`Example app listening on port ${port}!`));
 
+mongoose.set('strictQuery', false);
+mongoose
+  .connect(process.env.MONGO_DB)
+  .then(() => {
+    console.log('connected to MongoDB');
+    app.listen(port, () => {
+      console.log(`Node API app is running on port ${port}!`);
+    });
+  })
+  .catch((error) => {
+    console.log(error);
+  });
 
 const html = `
 <!DOCTYPE html>
@@ -52,7 +83,7 @@ const html = `
   </head>
   <body>
     <section>
-      Hello from Render!
+      Hello from OkSep!
     </section>
   </body>
 </html>
